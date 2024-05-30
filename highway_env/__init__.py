@@ -61,8 +61,8 @@ def register_highway_envs():
 
     # custom_intersection_env.py
     register(
-        id="custom-intersection-v0",
-        entry_point="highway_env.envs:CustomIntersectionEnv",
+        id="custom-highway-v0",
+        entry_point="highway_env.envs:CustomHighwayEnv",
     )
 
     # lane_keeping_env.py
