@@ -30,7 +30,11 @@ class CustomHighwayEnv(AbstractEnv):
                 "action": {
                     "type": "DiscreteMetaAction",
                 },
+<<<<<<< HEAD
                 "lanes_count": 4,
+=======
+                "lanes_count": 2,
+>>>>>>> origin/master
                 "vehicles_count": 50,
                 "controlled_vehicles": 1,
                 "initial_lane_id": None,
@@ -145,6 +149,7 @@ class CustomHighwayEnv(AbstractEnv):
         """The episode is truncated if the time limit is reached."""
         return self.time >= self.config["duration"]
 
+<<<<<<< HEAD
 '''
 class HighwayEnvFast(HighwayEnv):
     """
@@ -175,3 +180,34 @@ class HighwayEnvFast(HighwayEnv):
             if vehicle not in self.controlled_vehicles:
                 vehicle.check_collisions = False
 '''
+=======
+
+# class HighwayEnvFast(HighwayEnv):
+#     """
+#     A variant of highway-v0 with faster execution:
+#         - lower simulation frequency
+#         - fewer vehicles in the scene (and fewer lanes, shorter episode duration)
+#         - only check collision of controlled vehicles with others
+#     """
+
+#     @classmethod
+#     def default_config(cls) -> dict:
+#         cfg = super().default_config()
+#         cfg.update(
+#             {
+#                 "simulation_frequency": 5,
+#                 "lanes_count": 3,
+#                 "vehicles_count": 20,
+#                 "duration": 30,  # [s]
+#                 "ego_spacing": 1.5,
+#             }
+#         )
+#         return cfg
+
+#     def _create_vehicles(self) -> None:
+#         super()._create_vehicles()
+#         # Disable collision check for uncontrolled vehicles
+#         for vehicle in self.road.vehicles:
+#             if vehicle not in self.controlled_vehicles:
+#                 vehicle.check_collisions = False
+>>>>>>> origin/master
