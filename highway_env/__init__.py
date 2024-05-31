@@ -59,10 +59,10 @@ def register_highway_envs():
         entry_point="highway_env.envs:TupleMultiAgentIntersectionEnv",
     )
 
-    # custom_intersection_env.py
+    # custom_highway_env.py
     register(
-        id="custom-intersection-v0",
-        entry_point="highway_env.envs:CustomIntersectionEnv",
+        id="custom-highway-v0",
+        entry_point="highway_env.envs:CustomHighwayEnv",
     )
 
     # lane_keeping_env.py

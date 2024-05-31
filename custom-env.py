@@ -1,7 +1,7 @@
 import gymnasium as gym
 from matplotlib import pyplot as plt
 
-env = gym.make('custom-intersection-v0', render_mode="rgb_array")
+env = gym.make('custom-highway-v0', render_mode="rgb_array")
 
 env.unwrapped.configure({
     "collision_reward": -50,
