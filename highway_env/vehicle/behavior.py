@@ -582,3 +582,50 @@ class DefensiveVehicle(LinearVehicle):
         MERGE_ACC_GAIN / (MERGE_VEL_RATIO * MERGE_TARGET_VEL),
         2.0,
     ]
+
+class Pedestrian(LinearVehicle):
+    LANE_CHANGE_MIN_ACC_GAIN = 1.0  # [m/s2]
+    MERGE_ACC_GAIN = 1.0 # keep continued walking speed
+    MERGE_VEL_RATIO = 0.75
+    MERGE_TARGET_VEL = 1 # typical walking speed is between 1-1.3 m/s
+    ACCELERATION_PARAMETERS = [
+        MERGE_ACC_GAIN / ((1 - MERGE_VEL_RATIO) * MERGE_TARGET_VEL),
+        MERGE_ACC_GAIN / (MERGE_VEL_RATIO * MERGE_TARGET_VEL),
+        1.0,
+    ]
+
+class TailgateVehicle(LinearVehicle):
+    # copying AggressiveVehicle params for now, can be adjusted
+    LANE_CHANGE_MIN_ACC_GAIN = 1.0  # [m/s2]
+    MERGE_ACC_GAIN = 0.8
+    MERGE_VEL_RATIO = 0.75
+    MERGE_TARGET_VEL = 30
+    ACCELERATION_PARAMETERS = [
+        MERGE_ACC_GAIN / ((1 - MERGE_VEL_RATIO) * MERGE_TARGET_VEL),
+        MERGE_ACC_GAIN / (MERGE_VEL_RATIO * MERGE_TARGET_VEL),
+        0.5,
+    ]
+
+    # short distance to front vehicle
+    DISTANCE_WANTED =  1.0 + ControlledVehicle.LENGTH # [m]
+    TIME_WANTED = 0.75
+    # quickly speeds up and decelerates 
+    COMFORT_ACC_MAX =  4.0
+    COMFORT_ACC_MIN = -6.0
+
+class DrunkVehicle(LinearVehicle):
+    # copying AggressiveVehicle params for now, can be adjusted
+    LANE_CHANGE_MIN_ACC_GAIN = 1.0  # [m/s2]
+    # merges slower (?) than normal
+    MERGE_ACC_GAIN = 0.4
+    MERGE_VEL_RATIO = 0.75
+    MERGE_TARGET_VEL = 40
+    ACCELERATION_PARAMETERS = [
+        MERGE_ACC_GAIN / ((1 - MERGE_VEL_RATIO) * MERGE_TARGET_VEL),
+        MERGE_ACC_GAIN / (MERGE_VEL_RATIO * MERGE_TARGET_VEL),
+        0.5,
+    ]
+
+    # quickly speeds up and decelerates 
+    COMFORT_ACC_MAX =  4.0
+    COMFORT_ACC_MIN = -6.0
