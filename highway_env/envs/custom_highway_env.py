@@ -9,6 +9,7 @@ from highway_env.road.road import Road, RoadNetwork
 from highway_env.utils import near_split
 from highway_env.vehicle.controller import ControlledVehicle
 from highway_env.vehicle.kinematics import Vehicle
+from highway_env.vehicle.behavior import AntagonisticVehicle
 
 Observation = np.ndarray
 
@@ -30,12 +31,8 @@ class CustomHighwayEnv(AbstractEnv):
                 "action": {
                     "type": "DiscreteMetaAction",
                 },
-<<<<<<< HEAD
                 "lanes_count": 4,
-=======
-                "lanes_count": 2,
->>>>>>> origin/master
-                "vehicles_count": 50,
+                "vehicles_count": 40,
                 "controlled_vehicles": 1,
                 "initial_lane_id": None,
                 "duration": 40,  # [s]
@@ -69,8 +66,8 @@ class CustomHighwayEnv(AbstractEnv):
         )
 
     def _create_vehicles(self) -> None:
-        """Create some new random vehicles of a given type, and add them on the road."""
-        other_vehicles_type = utils.class_from_path(self.config["other_vehicles_type"])
+        """Create antagonistic vehicles and add them to the road."""
+
         other_per_controlled = near_split(
             self.config["vehicles_count"], num_bins=self.config["controlled_vehicles"]
         )
@@ -90,7 +87,7 @@ class CustomHighwayEnv(AbstractEnv):
             self.road.vehicles.append(vehicle)
 
             for _ in range(others):
-                vehicle = other_vehicles_type.create_random(
+                vehicle = AntagonisticVehicle.create_random(
                     self.road, spacing=1 / self.config["vehicles_density"]
                 )
                 vehicle.randomize_behavior()
@@ -149,65 +146,4 @@ class CustomHighwayEnv(AbstractEnv):
         """The episode is truncated if the time limit is reached."""
         return self.time >= self.config["duration"]
 
-<<<<<<< HEAD
-'''
-class HighwayEnvFast(HighwayEnv):
-    """
-    A variant of highway-v0 with faster execution:
-        - lower simulation frequency
-        - fewer vehicles in the scene (and fewer lanes, shorter episode duration)
-        - only check collision of controlled vehicles with others
-    """
 
-    @classmethod
-    def default_config(cls) -> dict:
-        cfg = super().default_config()
-        cfg.update(
-            {
-                "simulation_frequency": 5,
-                "lanes_count": 3,
-                "vehicles_count": 20,
-                "duration": 30,  # [s]
-                "ego_spacing": 1.5,
-            }
-        )
-        return cfg
-
-    def _create_vehicles(self) -> None:
-        super()._create_vehicles()
-        # Disable collision check for uncontrolled vehicles
-        for vehicle in self.road.vehicles:
-            if vehicle not in self.controlled_vehicles:
-                vehicle.check_collisions = False
-'''
-=======
-
-# class HighwayEnvFast(HighwayEnv):
-#     """
-#     A variant of highway-v0 with faster execution:
-#         - lower simulation frequency
-#         - fewer vehicles in the scene (and fewer lanes, shorter episode duration)
-#         - only check collision of controlled vehicles with others
-#     """
-
-#     @classmethod
-#     def default_config(cls) -> dict:
-#         cfg = super().default_config()
-#         cfg.update(
-#             {
-#                 "simulation_frequency": 5,
-#                 "lanes_count": 3,
-#                 "vehicles_count": 20,
-#                 "duration": 30,  # [s]
-#                 "ego_spacing": 1.5,
-#             }
-#         )
-#         return cfg
-
-#     def _create_vehicles(self) -> None:
-#         super()._create_vehicles()
-#         # Disable collision check for uncontrolled vehicles
-#         for vehicle in self.road.vehicles:
-#             if vehicle not in self.controlled_vehicles:
-#                 vehicle.check_collisions = False
->>>>>>> origin/master

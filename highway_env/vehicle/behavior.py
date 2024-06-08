@@ -629,3 +629,91 @@ class DrunkVehicle(LinearVehicle):
     # quickly speeds up and decelerates 
     COMFORT_ACC_MAX =  4.0
     COMFORT_ACC_MIN = -6.0
+
+    
+class AntagonisticVehicle(IDMVehicle):
+    #Vehicle that will change lanes frequently and brake check the ego vehicle
+    
+    LANE_CHANGE_PROBABILITY = 0.35 #probability of changing lanes each step
+    BRAKE_CHECK_PROBABILITY = 1 #probability of brake checking the ego vehicle when in front
+    
+    def act(self, action: Union[dict, str] = None):
+        super().act(action)
+        self.random_lane_change()
+        self.brake_check()
+
+    def random_lane_change(self):
+        """ Attempt a lane change with probablity LANE_CHANGE_PROBABILITY """
+        
+        if self.road.np_random.random() < self.LANE_CHANGE_PROBABILITY:
+            self.change_lane_policy()
+
+    def brake_check(self):
+        """ If in front of ego vehicle, decelerate with probability BRAKE_CHECK_PROBABILITY """
+        
+        ego_vehicle = self.road.vehicles[0]
+        if self.in_front(ego_vehicle) and self.road.np_random.random() < self.BRAKE_CHECK_PROBABILITY:
+            self.speed = max(0, self.speed - 2.5)
+
+    def in_front(self, vehicle: Vehicle) -> bool:
+        """ Check if in front of ego vehicle """
+        
+        #return false if not in same lane
+        if self.lane_index != vehicle.lane_index:
+            return False
+
+        ego_pos, _ = self.road.network.get_lane(self.lane_index).local_coordinates(self.position)
+        vehicle_pos, _ = self.road.network.get_lane(vehicle.lane_index).local_coordinates(vehicle.position)
+
+        return ego_pos > vehicle_pos and (ego_pos - vehicle_pos) <= 40.0
+
+    #override change_lane_policy    
+    def change_lane_policy(self) -> None:
+        """
+        Decide when to change lane.
+
+        Based on:
+        - frequency;
+        - closeness of the target lane;
+        - MOBIL model.
+        """
+        if self.road.np_random.random() >= self.LANE_CHANGE_PROBABILITY:
+            return
+        
+        # If a lane change is already ongoing
+        if self.lane_index != self.target_lane_index:
+            # If we are on correct route but bad lane: abort it if someone else is already changing into the same lane
+            if self.lane_index[:2] == self.target_lane_index[:2]:
+                for v in self.road.vehicles:
+                    if (
+                        v is not self
+                        and v.lane_index != self.target_lane_index
+                        and isinstance(v, ControlledVehicle)
+                        and v.target_lane_index == self.target_lane_index
+                    ):
+                        d = self.lane_distance_to(v)
+                        d_star = self.desired_gap(self, v)
+                        if 0 < d < d_star:
+                            self.target_lane_index = self.lane_index
+                            break
+            return
+
+        # else, at a given frequency,
+        if not utils.do_every(self.LANE_CHANGE_DELAY, self.timer):
+            return
+        self.timer = 0
+
+        # decide to make a lane change
+        for lane_index in self.road.network.side_lanes(self.lane_index):
+            # Is the candidate lane close enough?
+            if not self.road.network.get_lane(lane_index).is_reachable_from(
+                self.position
+            ):
+                continue
+            # Only change lane when the vehicle is moving
+            if np.abs(self.speed) < 1:
+                continue
+            # Does the MOBIL model recommend a lane change?
+            if self.mobil(lane_index):
+                self.target_lane_index = lane_index
+    
