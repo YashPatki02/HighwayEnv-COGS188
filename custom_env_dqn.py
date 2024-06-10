@@ -9,7 +9,7 @@ import shutil
 env = gym.make('custom-highway-v0', render_mode="rgb_array")
 
 env.unwrapped.configure({
-    "collision_reward": -50,
+    "spawn_probability": 0,
 })
 
 # Clear directory to avoid repeat logs
@@ -37,7 +37,7 @@ model.save("highway_dqn/model")
 
 # Load and test saved model 5 times
 model = DQN.load("highway_dqn/model")
-for _ in range(5):
+for _ in range(100):
     obs, info = env.reset()
     done = truncated = False
     while not (done or truncated):

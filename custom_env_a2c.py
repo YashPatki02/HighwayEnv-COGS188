@@ -1,6 +1,6 @@
 import gymnasium as gym
 from matplotlib import pyplot as plt
-from stable_baselines3 import PPO
+from stable_baselines3 import A2C
 import shutil
 
 import os
@@ -10,7 +10,7 @@ import logging
 
 
 
-# Training PPO using vectorized env for faster speed
+# Training A2C using vectorized env for faster speed
 if __name__ == "__main__":
   
     train = True
@@ -33,18 +33,16 @@ if __name__ == "__main__":
         )
         
         # Clear directory to avoid repeat logs
-        log_dir = "highway_ppo/PPO"
+        log_dir = "highway_a2c/A2C"
         if os.path.exists(log_dir):
             shutil.rmtree(log_dir)
             
-        # Create PPO model
-        model = PPO(
+        # Create A2C model
+        model = A2C(
             "MlpPolicy",
             env,
-            policy_kwargs=dict(net_arch=[dict(pi=[256, 256], vf=[256, 256])]),
-            n_steps=batch_size * 12 // n_cpu,
-            batch_size=batch_size,
-            n_epochs=10,
+            policy_kwargs=dict(net_arch=[256, 256]), 
+            n_steps=batch_size // n_cpu,
             learning_rate=5e-4,
             gamma=0.8,
             verbose=2,
@@ -53,10 +51,10 @@ if __name__ == "__main__":
 
         # Learn and save trained agent
         model.learn(total_timesteps=int(200000))
-        model.save("highway_ppo/model")
+        model.save("highway_a2c/model")
 
     # Load and test saved model 5 times
-    model = PPO.load("highway_ppo/model")
+    model = A2C.load("highway_a2c/model")
     
     env = gym.make('custom-highway-v0', render_mode="rgb_array")
     env.unwrapped.configure({

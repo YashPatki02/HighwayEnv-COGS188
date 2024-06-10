@@ -634,8 +634,8 @@ class DrunkVehicle(LinearVehicle):
 class AntagonisticVehicle(IDMVehicle):
     #Vehicle that will change lanes frequently and brake check the ego vehicle
     
-    LANE_CHANGE_PROBABILITY = 0.35 #probability of changing lanes each step
-    BRAKE_CHECK_PROBABILITY = 1 #probability of brake checking the ego vehicle when in front
+    LANE_CHANGE_PROBABILITY = 0.6 #probability of changing lanes each step
+    BRAKE_CHECK_PROBABILITY = 0.9 #probability of brake checking the ego vehicle when in front
     
     def act(self, action: Union[dict, str] = None):
         super().act(action)
