@@ -31,8 +31,8 @@ class CustomCallback(BaseCallback):
             self.episode_rewards.append(sum(self.locals['rewards']))
             self.episode_lengths.append(len(self.locals['rewards']))
             # Add logic to detect collisions from the 'info' dictionary if available
-            if 'collision' in self.locals['infos'][0]:
-                self.collisions += self.locals['infos'][0]['collision']
+            if self.locals['infos'][0]['crashed'] == True:
+                self.collisions += 1
         return True
 
     def _on_training_end(self):

@@ -8,6 +8,8 @@ from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.vec_env import SubprocVecEnv
 from stable_baselines3.common.callbacks import BaseCallback
 from tqdm import tqdm
+import highway_env
+highway_env.register_highway_envs()
 
 # Function to check if TensorBoard is installed
 def is_tensorboard_installed():
@@ -31,8 +33,8 @@ class CustomCallback(BaseCallback):
             self.episode_rewards.append(sum(self.locals['rewards']))
             self.episode_lengths.append(len(self.locals['rewards']))
             # Add logic to detect collisions from the 'info' dictionary if available
-            if 'collision' in self.locals['infos'][0]:
-                self.collisions += self.locals['infos'][0]['collision']
+            if self.locals['infos'][0]['crashed'] == True:
+                self.collisions += 1
         return True
 
     def _on_training_end(self):
@@ -77,7 +79,7 @@ if __name__ == "__main__":
             verbose=2,
             tensorboard_log=tensorboard_log,
         )
-        model.learn(total_timesteps=int(10000), callback=callback)
+        model.learn(total_timesteps=int(1000), callback=callback)
         model.save("highway_a2c/model")
         metrics = callback.get_metrics()
         print("A2C Metrics:", metrics)
