@@ -17,7 +17,10 @@ data = {
     'Average Reward': [a2c_metrics['average_reward'], ppo_metrics['average_reward'], dqn_metrics['average_reward']],
     'Average Length': [a2c_metrics['average_length'], ppo_metrics['average_length'], dqn_metrics['average_length']],
     'Collision Rate': [a2c_metrics['collision_rate'], ppo_metrics['collision_rate'], dqn_metrics['collision_rate']],
-    'Training Time': [a2c_metrics['training_time'], ppo_metrics['training_time'], dqn_metrics['training_time']]
+    'Training Time': [a2c_metrics['training_time'], ppo_metrics['training_time'], dqn_metrics['training_time']],
+    'Convergence Rate': [a2c_metrics['convergence_rate'], ppo_metrics['convergence_rate'], dqn_metrics['convergence_rate']],
+    'Evaluation Average Reward': [a2c_metrics['eval_average_reward'], ppo_metrics['eval_average_reward'], dqn_metrics['eval_average_reward']],
+    'Evaluation Collision Rate': [a2c_metrics['eval_collision_rate'], ppo_metrics['eval_collision_rate'], dqn_metrics['eval_collision_rate']],
 }
 
 df = pd.DataFrame(data)

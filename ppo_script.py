@@ -19,12 +19,14 @@ def is_tensorboard_installed():
 
 # Custom callback to track performance metrics
 class CustomCallback(BaseCallback):
-    def __init__(self):
+    def __init__(self, threshold=200):
         super(CustomCallback, self).__init__()
         self.episode_rewards = []
         self.episode_lengths = []
         self.collisions = 0
         self.start_time = time.time()
+        self.threshold = threshold
+        self.convergence_rate = None
 
     def _on_step(self) -> bool:
         if any(self.locals['dones']):
@@ -39,6 +41,14 @@ class CustomCallback(BaseCallback):
         self.end_time = time.time()
         self.training_time = self.end_time - self.start_time
 
+        # Calculate convergence rate
+        for i in range(len(self.episode_rewards)):
+            if np.mean(self.episode_rewards[i:i+100]) >= self.threshold:
+                self.convergence_rate = i + 100
+                break
+        if self.convergence_rate is None:
+            self.convergence_rate = "Did not converge"
+
     def get_metrics(self):
         average_reward = np.mean(self.episode_rewards)
         average_length = np.mean(self.episode_lengths)
@@ -47,7 +57,8 @@ class CustomCallback(BaseCallback):
             'average_reward': average_reward,
             'average_length': average_length,
             'collision_rate': collision_rate,
-            'training_time': self.training_time
+            'training_time': self.training_time,
+            'convergence_rate': self.convergence_rate
         }
 
 # Training PPO using vectorized env for faster speed
@@ -79,7 +90,7 @@ if __name__ == "__main__":
             verbose=2,
             tensorboard_log=tensorboard_log,
         )
-        model.learn(total_timesteps=int(10000), callback=callback)
+        model.learn(total_timesteps=int(200000), callback=callback)
         model.save("highway_ppo/model")
         metrics = callback.get_metrics()
         print("PPO Metrics:", metrics)
@@ -88,11 +99,29 @@ if __name__ == "__main__":
     model = PPO.load("highway_ppo/model")
     env = gym.make('custom-highway-v0', render_mode="rgb_array")
     env.unwrapped.configure({"spawn_probability": 0})
+    
+    collision_count = 0
+    total_episodes = 100
+    episode_rewards = []
+
     for _ in tqdm(range(100), desc="Testing PPO"):
         obs, info = env.reset()
         done = truncated = False
+        episode_reward = 0
         while not (done or truncated):
             action, _ = model.predict(obs)
             obs, reward, done, truncated, info = env.step(action)
+            episode_reward += reward
+            if info['crashed']:
+                collision_count += 1
             env.render()
+        episode_rewards.append(episode_reward)
     env.close()
+
+    print("Collision rate:", collision_count / total_episodes)
+    print("Average reward:", np.mean(episode_rewards))
+
+    metrics['eval_collision_rate'] = collision_count / total_episodes
+    metrics['eval_average_reward'] = np.mean(episode_rewards)
+    metrics['total_reward'] = sum(episode_rewards)
+    np.save("ppo_metrics.npy", metrics)
